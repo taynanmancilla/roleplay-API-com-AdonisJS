@@ -29,7 +29,7 @@ test.group('User', () => {
     assert.exists(body.user.id, 'ID Undefined') // Se nao retornar ID da esse erro
     assert.equal(body.user.email, userPayload.email) // Compara o email com o email do payload
     assert.equal(body.user.username, userPayload.username) // Compara o username com o username do payload
-    assert.equal(body.user.password, userPayload.password) // Compara o password com o password do payload
+    assert.notExists(body.user.password, 'Password Defined') // Compara o password com o password do payload
     assert.equal(body.user.avatar, userPayload.avatar) // Compara o avatar com o avatar do payload
   })
 }) // Agrupar varios testes
