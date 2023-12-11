@@ -1,3 +1,4 @@
+import { UserFactory } from 'Database/factories'
 import test from 'japa'
 import supertest from 'supertest'
 
@@ -16,7 +17,7 @@ const BASE_URL = `http://${process.env.HOST}:${process.env.PORT}`
 */
 test.group('User', () => {
   // Usando o 'Only' somente esse teste executa
-  test.only('Deve criar um usuario', async (assert) => {
+  test('Deve criar um usuario', async (assert) => {
     // Criando o corpo da requisicao(conjunto de informacoes que pertencem ao usuario)
     const userPayload = {
       email: 'test@test.com',
@@ -31,5 +32,17 @@ test.group('User', () => {
     assert.equal(body.user.username, userPayload.username) // Compara o username com o username do payload
     assert.notExists(body.user.password, 'Password Defined') // Compara o password com o password do payload
     assert.equal(body.user.avatar, userPayload.avatar) // Compara o avatar com o avatar do payload
+  })
+  test('Deve retornar 409 quando o e-mail já estiver em uso', async (assert) => {
+    const { email } = await UserFactory.create()
+    // eslint-disable-next-line prettier/prettier
+    const { body } = await supertest(BASE_URL) 
+      .post('/users')
+      .send({
+        email,
+        username: 'test',
+        password: 'test',
+      })
+      .expect(409)
   })
 }) // Agrupar varios testes
