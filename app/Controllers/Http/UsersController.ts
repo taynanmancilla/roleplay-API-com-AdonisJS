@@ -14,7 +14,7 @@ export default class UsersController {
     const userByEmail = await User.findBy('email', userPayload.email)
     const userByUsername = await User.findBy('username', userPayload.username)
 
-    if (userByEmail) throw new BadRequest('Email ja esta em uso', 409)
+    if (userByEmail) throw new BadRequest('email ja esta em uso', 409)
     if (userByUsername) throw new BadRequest('username ja esta em uso', 409)
 
     const user = await User.create(userPayload)

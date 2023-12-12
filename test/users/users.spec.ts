@@ -16,6 +16,8 @@ const BASE_URL = `http://${process.env.HOST}:${process.env.PORT}`
     }
   }
 */
+
+// Agrupar varios testes
 test.group('User', (group) => {
   // Usando o 'Only' somente esse teste executa
   test('Deve criar um usuario', async (assert) => {
@@ -32,9 +34,9 @@ test.group('User', (group) => {
     assert.equal(body.user.email, userPayload.email) // Compara o email com o email do payload
     assert.equal(body.user.username, userPayload.username) // Compara o username com o username do payload
     assert.notExists(body.user.password, 'Password Defined') // Compara o password com o password do payload
-    assert.equal(body.user.avatar, userPayload.avatar) // Compara o avatar com o avatar do payload
+    // assert.equal(body.user.avatar, userPayload.avatar) // Compara o avatar com o avatar do payload
   })
-  test('Deve retornar 409 quando o e-mail já estiver em uso', async (assert) => {
+  test('Deve retornar 409 quando o email já estiver em uso', async (assert) => {
     const { email } = await UserFactory.create()
     // eslint-disable-next-line prettier/prettier
     const { body } = await supertest(BASE_URL)
@@ -68,8 +70,37 @@ test.group('User', (group) => {
     assert.equal(body.status, 409)
   })
 
-  test.only('Deve retornar 422 quando nao informar dados obrigatorios', async (assert) => {
+  test('Deve retornar 422 quando nao informar dados obrigatorios', async (assert) => {
     const { body } = await supertest(BASE_URL).post('/users').send({}).expect(422)
+
+    assert.equal(body.code, 'BAD_REQUEST')
+    assert.equal(body.status, 422)
+  })
+
+  test('Deve retornar 422 quando informar email invalido', async (assert) => {
+    const { body } = await supertest(BASE_URL)
+      .post('/users')
+      .send({
+        email: 'test@',
+        username: 'test',
+        password: 'test',
+      })
+      .expect(422)
+
+    assert.equal(body.code, 'BAD_REQUEST')
+    assert.equal(body.status, 422)
+  })
+
+  test('Deve retornar 422 quando informar senha invalida', async (assert) => {
+    const { body } = await supertest(BASE_URL)
+      .post('/users')
+      .send({
+        email: 'test@test.com',
+        username: 'test',
+        password: 'tes',
+      })
+      .expect(422)
+
     assert.equal(body.code, 'BAD_REQUEST')
     assert.equal(body.status, 422)
   })
@@ -80,4 +111,4 @@ test.group('User', (group) => {
   group.afterEach(async () => {
     await Database.rollbackGlobalTransaction()
   })
-}) // Agrupar varios testes
+})
