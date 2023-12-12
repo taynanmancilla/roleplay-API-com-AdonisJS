@@ -51,7 +51,7 @@ test.group('User', (group) => {
     assert.equal(body.status, 409)
   })
 
-  test.only('Deve retornar 409 quando o username já estiver em uso', async (assert) => {
+  test('Deve retornar 409 quando o username já estiver em uso', async (assert) => {
     const { username } = await UserFactory.create()
     // eslint-disable-next-line prettier/prettier
     const { body } = await supertest(BASE_URL)
@@ -66,6 +66,12 @@ test.group('User', (group) => {
     assert.include(body.message, 'username')
     assert.equal(body.code, 'BAD_REQUEST')
     assert.equal(body.status, 409)
+  })
+
+  test.only('Deve retornar 422 quando nao informar dados obrigatorios', async (assert) => {
+    const { body } = await supertest(BASE_URL).post('/users').send({}).expect(422)
+    assert.equal(body.code, 'BAD_REQUEST')
+    assert.equal(body.status, 422)
   })
 
   group.beforeEach(async () => {
