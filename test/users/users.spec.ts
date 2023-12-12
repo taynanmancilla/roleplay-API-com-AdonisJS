@@ -1,3 +1,4 @@
+import Database from '@ioc:Adonis/Lucid/Database'
 import { UserFactory } from 'Database/factories'
 import test from 'japa'
 import supertest from 'supertest'
@@ -15,7 +16,7 @@ const BASE_URL = `http://${process.env.HOST}:${process.env.PORT}`
     }
   }
 */
-test.group('User', () => {
+test.group('User', (group) => {
   // Usando o 'Only' somente esse teste executa
   test('Deve criar um usuario', async (assert) => {
     // Criando o corpo da requisicao(conjunto de informacoes que pertencem ao usuario)
@@ -36,7 +37,7 @@ test.group('User', () => {
   test('Deve retornar 409 quando o e-mail já estiver em uso', async (assert) => {
     const { email } = await UserFactory.create()
     // eslint-disable-next-line prettier/prettier
-    const { body } = await supertest(BASE_URL) 
+    const { body } = await supertest(BASE_URL)
       .post('/users')
       .send({
         email,
@@ -44,5 +45,33 @@ test.group('User', () => {
         password: 'test',
       })
       .expect(409)
+
+    assert.include(body.message, 'email')
+    assert.equal(body.code, 'BAD_REQUEST')
+    assert.equal(body.status, 409)
+  })
+
+  test.only('Deve retornar 409 quando o username já estiver em uso', async (assert) => {
+    const { username } = await UserFactory.create()
+    // eslint-disable-next-line prettier/prettier
+    const { body } = await supertest(BASE_URL)
+      .post('/users')
+      .send({
+        email: 'test@test.com',
+        username,
+        password: 'test',
+      })
+      .expect(409)
+
+    assert.include(body.message, 'username')
+    assert.equal(body.code, 'BAD_REQUEST')
+    assert.equal(body.status, 409)
+  })
+
+  group.beforeEach(async () => {
+    await Database.beginGlobalTransaction()
+  })
+  group.afterEach(async () => {
+    await Database.rollbackGlobalTransaction()
   })
 }) // Agrupar varios testes
