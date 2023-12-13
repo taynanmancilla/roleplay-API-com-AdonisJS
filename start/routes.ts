@@ -28,3 +28,4 @@ Route.get('/', async () => {
 //   return response.created({})
 // })
 Route.post('/users', 'UsersController.store')
+Route.put('/users/:id', 'UsersController.update')

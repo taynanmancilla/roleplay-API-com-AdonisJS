@@ -20,4 +20,20 @@ export default class UsersController {
     const user = await User.create(userPayload)
     return response.created({ user })
   }
+
+  public async update({ request, response }: HttpContextContract) {
+    // const userPayload = request.only(['email', 'avatar', 'password'])
+    const { email, password, avatar } = request.only(['email', 'avatar', 'password'])
+    // pegando o 'id' passado pela rota
+    const id = request.param('id')
+    const user = await User.findOrFail(id)
+
+    user.email = email
+    user.password = password
+    if (avatar) user.avatar = avatar
+    await user.save()
+
+    return response.ok({ user })
+    // return response.ok({}) // Passar so essa linha pra validar a criacao da rota no teste
+  }
 }
