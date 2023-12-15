@@ -1,3 +1,4 @@
+import Mail from '@ioc:Adonis/Addons/Mail'
 import Database from '@ioc:Adonis/Lucid/Database'
 import { UserFactory } from 'Database/factories'
 import test from 'japa'
@@ -9,6 +10,18 @@ test.group('Password', (group) => {
   test.only('Deve enviar um email com instrucoes de redefinicao de senha', async (assert) => {
     const user = await UserFactory.create()
 
+    Mail.trap((message) => {
+      assert.deepEqual(message.to, [
+        {
+          address: user.email,
+        }
+      ])
+      assert.deepEqual(message.from, {
+        address: 'no-reply@roleplay.com',
+      })
+      assert.equal(message.subject, 'Roleplay: Recuperação de Senha')
+      assert.equal(message.text, 'Clique no link abaixo pra redefinir sua senha.')
+    })
     await supertest(BASE_URL)
       .post('/forgot-password')
       .send({
@@ -16,6 +29,8 @@ test.group('Password', (group) => {
         resetPassword: 'url',
       })
       .expect(204)
+
+      Mail.restore()
   })
 
   group.beforeEach(async () => {
