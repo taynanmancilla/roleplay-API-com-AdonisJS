@@ -10,17 +10,18 @@ test.group('Password', (group) => {
   test.only('Deve enviar um email com instrucoes de redefinicao de senha', async (assert) => {
     const user = await UserFactory.create()
 
+    // Ao usar essa trap nao gastamos a cota de email enviando eles
     Mail.trap((message) => {
       assert.deepEqual(message.to, [
         {
           address: user.email,
-        }
+        },
       ])
       assert.deepEqual(message.from, {
         address: 'no-reply@roleplay.com',
       })
       assert.equal(message.subject, 'Roleplay: Recuperação de Senha')
-      assert.equal(message.text, 'Clique no link abaixo pra redefinir sua senha.')
+      assert.include(message.html!, user.username)
     })
     await supertest(BASE_URL)
       .post('/forgot-password')
@@ -30,7 +31,7 @@ test.group('Password', (group) => {
       })
       .expect(204)
 
-      Mail.restore()
+    Mail.restore()
   })
 
   group.beforeEach(async () => {
