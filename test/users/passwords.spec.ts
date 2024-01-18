@@ -7,7 +7,7 @@ import supertest from 'supertest'
 const BASE_URL = `http://${process.env.HOST}:${process.env.PORT}`
 
 test.group('Password', (group) => {
-  test.only('Deve enviar um email com instrucoes de redefinicao de senha', async (assert) => {
+  test('Deve enviar um email com instrucoes de redefinicao de senha', async (assert) => {
     const user = await UserFactory.create()
 
     // Ao usar essa trap nao gastamos a cota de email enviando eles
@@ -32,6 +32,22 @@ test.group('Password', (group) => {
       .expect(204)
 
     Mail.restore()
+  })
+
+  test.only('Deve criar um token de redefinicao de senha', async (assert) => {
+    const user = await UserFactory.create();
+
+    await supertest(BASE_URL)
+      .post('/forgot-password')
+      .send({
+        email: user.email,
+        resetPasswordUrl: 'url',
+      })
+      .expect(204);
+
+    const tokens = await user.related('tokens').query();
+    console.log({ tokens });
+    assert.isNotEmpty(tokens);
   })
 
   group.beforeEach(async () => {

@@ -1,6 +1,7 @@
 import Hash from '@ioc:Adonis/Core/Hash'
 import { DateTime } from 'luxon'
-import { BaseModel, beforeSave, column } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, HasMany, beforeSave, column, hasMany } from '@ioc:Adonis/Lucid/Orm'
+import LinkToken from './LinkToken'
 
 // Com esse 'extends BaseModel' vc ganha funcionalidades de acesso ao BD
 // basicamente temos acesso aos metodos do banco a partir dele
@@ -25,6 +26,11 @@ export default class User extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
+
+  @hasMany(() => LinkToken, {
+    foreignKey: 'userID',
+  })
+  public tokens: HasMany<typeof LinkToken>
 
   @beforeSave()
   public static async hashPassword(user: User) {
